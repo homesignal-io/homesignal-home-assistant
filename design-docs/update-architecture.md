@@ -1,0 +1,505 @@
+You should treat this as a safety-critical distributed systems problem, not “app deployment.” Integrators will tolerate feature gaps. They will not tolerate bricked sites, broken automations, unreachable boxes, or mystery failures after an update.
+
+The core mistake most IoT/device-agent platforms make is treating the edge agent like a SaaS frontend. It is not. Your edge agent is closer to firmware.
+
+A good mental model:
+
+* Cloud = orchestration + intelligence
+* Edge agent = durable appliance runtime
+* Updates = controlled migrations, not deployments
+
+Given your HA/integrator context, I would strongly recommend these principles:
+
+⸻
+
+1. Immutable, versioned agent releases
+
+Never “hot mutate” a running installation.
+
+Every release should be:
+
+* signed
+* immutable
+* content-addressed
+* rollbackable
+
+Think:
+
+* OCI image digest
+* or signed package bundle
+* with exact dependency versions
+
+Never:
+
+* latest
+* floating dependencies
+* runtime pip/npm installs
+* self-modifying environments
+
+Integrators hate:
+
+* “it worked yesterday”
+* “dependency upstream changed”
+* “Python package broke SSL”
+* “Node updated and websocket auth broke”
+
+Your release artifact should be reproducible byte-for-byte.
+
+⸻
+
+2. Dual-track architecture: stable vs candidate
+
+You need channels.
+
+At minimum:
+
+Channel	Audience
+Stable	default production installs
+Candidate	opt-in integrators
+Dev	internal only
+
+Do not let customers jump arbitrary versions casually.
+
+You want controlled upgrade paths:
+
+* 1.4 → 1.5
+* not 1.1 → 1.9
+
+Because migrations become impossible to reason about otherwise.
+
+⸻
+
+3. A/B rollback or snapshot rollback
+
+This is non-negotiable eventually.
+
+You need one of:
+
+* A/B partitioning
+* container snapshot rollback
+* atomic image swap
+* supervisor-managed previous-version restore
+
+A failed update must:
+
+1. fail health checks
+2. auto-revert
+3. preserve local state
+4. preserve credentials
+5. come back online automatically
+
+The integrator should wake up to:
+
+“Update reverted automatically due to failed health check.”
+
+not:
+
+“The site is offline.”
+
+⸻
+
+4. Health checks must reflect actual function
+
+Most systems do fake health checks:
+
+* process alive
+* TCP port open
+
+Worthless.
+
+Your checks should validate:
+
+* HA connectivity
+* MQTT broker connectivity
+* local DB writable
+* outbound cloud auth valid
+* queue drain functioning
+* websocket subscriptions active
+* disk pressure acceptable
+* memory leak thresholds
+* event processing latency
+
+You need:
+
+* startup health
+* steady-state health
+* degraded-mode health
+
+⸻
+
+5. Explicit degraded modes
+
+This is critical.
+
+The edge agent should continue operating locally even if:
+
+* cloud unreachable
+* auth expired
+* update service broken
+* metrics upload failing
+
+Local-first authority is correct for your architecture.
+
+Cloud loss should degrade:
+
+* fleet management
+* analytics
+* orchestration
+
+—not local automation collection/runtime.
+
+Integrators absolutely need this.
+
+⸻
+
+6. Separate control plane from data plane
+
+Huge design issue.
+
+Do NOT couple:
+
+* telemetry
+* command execution
+* updates
+* websocket control
+* local processing
+
+into one monolithic connection.
+
+You want:
+
+* independent queues
+* resumable operations
+* durable local buffering
+
+Otherwise one failure cascades.
+
+⸻
+
+7. Database migrations are the real risk
+
+Not binaries.
+
+Almost every catastrophic release failure is:
+
+* schema migration
+* corrupted state
+* incompatible persistence model
+
+Rules:
+
+* migrations must be forward compatible
+* ideally reversible
+* old agent should survive rollback against migrated DB
+* never destructive in same release
+
+Pattern:
+
+1. additive schema
+2. dual-write
+3. migrate reads
+4. cleanup later
+
+Slow boring migrations win.
+
+⸻
+
+8. Your update orchestrator needs “site awareness”
+
+Home Assistant environments are messy.
+
+You’ll encounter:
+
+* Raspberry Pi SD corruption
+* low disk
+* broken DNS
+* captive VLANs
+* old kernels
+* power instability
+* integrator custom hacks
+* unsupported addons
+* weird MQTT topologies
+
+So updates must evaluate:
+
+* available disk
+* memory
+* CPU architecture
+* dependency compatibility
+* HA version compatibility
+* backup success
+* uptime state
+
+before applying.
+
+“Update available” is not enough.
+
+⸻
+
+9. Mandatory pre-update snapshot/backup
+
+Before update:
+
+* snapshot config
+* snapshot local DB
+* snapshot credentials
+* snapshot mappings/topology
+
+Prefer automatic.
+
+If restore requires CLI recovery, your UX failed.
+
+⸻
+
+10. Treat agent commands as distributed transactions
+
+Especially dangerous operations:
+
+* restart HA
+* firmware update
+* credential rotation
+* network changes
+* MQTT rebinding
+
+Need:
+
+* idempotency
+* checkpoints
+* timeout recovery
+* resumability
+* audit trail
+
+Because devices WILL:
+
+* reboot mid-operation
+* lose power
+* lose WAN
+* partially apply
+
+You already identified this pattern elsewhere with deterministic execution. Same principle here.
+
+⸻
+
+11. Strong release rings
+
+You should eventually support:
+
+* internal
+* dogfood integrators
+* low-risk customers
+* general rollout
+
+Rollouts should be:
+
+* progressive
+* measurable
+* haltable
+
+You need automated rollback triggers based on:
+
+* crash rate
+* memory growth
+* disconnect rate
+* update failure rate
+* HA API failures
+
+⸻
+
+12. Minimize agent responsibility
+
+Critical architectural point.
+
+Your edge agent should NOT:
+
+* contain business logic explosion
+* dynamically execute arbitrary AI code
+* become plugin spaghetti
+* host uncontrolled third-party extensions
+
+Because maintenance burden explodes.
+
+Prefer:
+
+* deterministic runtime
+* declarative configs
+* signed modules
+* feature flags
+* constrained execution model
+
+Your instinct about agent outputs being constrained DSL/config instead of arbitrary runtime code is correct.
+
+⸻
+
+13. Build an “offline serviceability” story
+
+Integrators eventually need:
+
+* local UI
+* recovery shell
+* local logs
+* export bundle
+* emergency disable update
+* manual rollback
+* local diagnostics
+
+Because some sites will have:
+
+* no WAN
+* broken WAN
+* broken DNS
+* firewall changes
+
+If recovery requires your cloud, you created a single point of failure.
+
+⸻
+
+14. Observability must be temporal
+
+This matters more than dashboards.
+
+Integrators need:
+
+* “what changed?”
+* “when did degradation begin?”
+* “what version was running?”
+* “what update preceded this?”
+
+So your system should aggressively track:
+
+* version timelines
+* topology changes
+* config diffs
+* device churn
+* latency drift
+* resource drift
+
+Most operational debugging is temporal correlation.
+
+⸻
+
+15. Your biggest long-term risk is version skew
+
+You will eventually have:
+
+* old HA versions
+* old agent versions
+* old plugins
+* incompatible APIs
+* abandoned installs
+
+You need a compatibility policy early.
+
+Example:
+
+* support N-2 HA major versions
+* support agent versions for 12 months
+* forced minimum version for cloud APIs
+
+Otherwise maintenance cost becomes exponential.
+
+⸻
+
+The important meta-point:
+
+The integrator pain is not “updates are annoying.”
+
+The pain is:
+
+“I no longer trust touching this system.”
+
+Once trust is lost:
+
+* updates stop
+* installs drift
+* support costs explode
+* fleet fragmentation kills velocity
+
+So your real product is not the agent.
+
+It is:
+
+predictable operational behavior under failure.
+
+
+## Addendum: Local Supervisor Architecture
+
+A core architectural principle of the platform is that update orchestration and local update execution are intentionally separated.
+
+The cloud control plane does not directly mutate devices. Instead, it publishes desired state and rollout intent. A lightweight local supervisor running on each managed site is responsible for safely converging the system toward that desired state.
+
+This supervisor is our code and is treated as durable infrastructure rather than application logic.
+
+### Architectural Split
+
+#### Cloud Control Plane
+Responsible for:
+- release management
+- rollout cohorts/rings
+- desired version assignment
+- release channels (stable/candidate/dev)
+- rollout pause/resume
+- fleet visibility
+- telemetry aggregation
+- compatibility policy
+- signed artifact publication
+
+The cloud should never directly execute arbitrary remote commands against managed sites.
+
+#### Local Supervisor
+A stable local daemon responsible for:
+- polling desired state
+- authenticating with the control plane
+- verifying signed artifacts
+- evaluating local update readiness
+- creating snapshots/backups
+- applying updates atomically
+- restarting managed services
+- executing health checks
+- automatically rolling back failed updates
+- buffering telemetry/logs while offline
+- exposing local diagnostics/recovery capabilities
+
+The supervisor should remain intentionally conservative, deterministic, and minimal in scope.
+
+The supervisor is not:
+- an AI runtime
+- a plugin marketplace
+- a general-purpose script execution engine
+- a fast-moving feature layer
+
+Its primary responsibility is maintaining operational safety and recoverability of the local system.
+
+#### Agent / Plugin Layer
+The higher-level application layer responsible for:
+- Home Assistant integration
+- topology discovery
+- telemetry collection
+- automation/control workflows
+- user-facing functionality
+- cloud synchronization
+
+This layer is intentionally replaceable and allowed to evolve more rapidly than the supervisor.
+
+If the agent/plugin fails, the supervisor must still remain operational and capable of:
+- rollback
+- recovery
+- diagnostics
+- reconnection to cloud services
+
+### Desired State Model
+
+The platform follows a desired-state reconciliation model.
+
+The cloud declares intent:
+
+```json
+{
+  "site_id": "site_123",
+  "component": "ha_plugin",
+  "target_version": "1.8.3",
+  "release_channel": "stable",
+  "artifact_digest": "sha256:...",
+  "rollout_id": "rollout_456"
+}
+
+

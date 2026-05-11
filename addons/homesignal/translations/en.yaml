@@ -1,0 +1,5 @@
+configuration:
+  title: HomeSignal
+  description: Local HomeSignal agent for Home Assistant fleet management.
+network:
+  8099/tcp: HomeSignal local HTTP server

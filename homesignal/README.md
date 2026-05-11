@@ -29,6 +29,8 @@ The add-on requests only:
 
 It does not request Docker access, host networking, privileged mode, full access, the Docker socket, or broad Home Assistant filesystem mappings.
 
+The container currently runs with the image default user so it can write Home Assistant's mounted `/config` add-on storage path.
+
 ## Storage
 
 The agent stores add-on-owned data in `/config`, backed by Home Assistant's `addon_config:rw` mapping. On first boot it creates:

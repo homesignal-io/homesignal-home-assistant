@@ -2,7 +2,7 @@
 
 FROM golang:1.25-alpine AS builder
 
-ARG BUILD_VERSION=0.1.0
+ARG BUILD_VERSION=0.1.1
 ARG BUILD_ARCH=amd64
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
@@ -23,7 +23,7 @@ RUN case "${BUILD_ARCH}" in \
 
 FROM alpine:3.22
 
-ARG BUILD_VERSION=0.1.0
+ARG BUILD_VERSION=0.1.1
 ARG BUILD_ARCH=amd64
 
 LABEL \
@@ -31,13 +31,9 @@ LABEL \
     io.hass.type="app" \
     io.hass.arch="${BUILD_ARCH}"
 
-RUN addgroup -S homesignal \
-    && adduser -S -D -H -u 1000 -G homesignal homesignal \
-    && mkdir -p /config /data \
-    && chown -R homesignal:homesignal /config /data
+RUN mkdir -p /config /data
 
 COPY --from=builder /out/homesignal-agent /usr/local/bin/homesignal-agent
 
-USER homesignal:homesignal
 EXPOSE 8099
 ENTRYPOINT ["/usr/local/bin/homesignal-agent"]

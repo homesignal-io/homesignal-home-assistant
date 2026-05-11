@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Fix Home Assistant runtime storage writes to `/config/device.json`.
+
 ## 0.1.0
 
 - Add initial local-build Home Assistant add-on skeleton.

@@ -4,6 +4,8 @@
 
 The agent is a single Go HTTP server listening on port `8099` by default. Home Assistant ingress is wired to `/ui`.
 
+The container does not request privileged mode, host networking, Docker access, full access, or broad host filesystem mounts. It currently runs the agent as the image default user because Home Assistant owns the mounted `/config` add-on storage path, and the agent must be able to create `/config/device.json` on first boot.
+
 ## Identity
 
 On startup, the agent ensures `/config/device.json` exists. If the file is missing, it writes a generated UUIDv4-style `installation_id`. If the file exists, the existing ID is reused.

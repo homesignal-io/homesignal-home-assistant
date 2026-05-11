@@ -11,10 +11,15 @@ WORKDIR /src
 COPY go.mod ./
 COPY cmd ./cmd
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=${BUILD_ARCH} go build \
-    -trimpath \
-    -ldflags="-s -w -X main.version=${BUILD_VERSION} -X main.commit=${COMMIT} -X main.buildTime=${BUILD_TIME}" \
-    -o /out/homesignal-agent ./cmd/agent
+RUN case "${BUILD_ARCH}" in \
+        aarch64) export GOARCH=arm64 ;; \
+        amd64) export GOARCH=amd64 ;; \
+        *) echo "unsupported BUILD_ARCH=${BUILD_ARCH}" >&2; exit 1 ;; \
+    esac \
+    && CGO_ENABLED=0 GOOS=linux go build \
+        -trimpath \
+        -ldflags="-s -w -X main.version=${BUILD_VERSION} -X main.commit=${COMMIT} -X main.buildTime=${BUILD_TIME}" \
+        -o /out/homesignal-agent ./cmd/agent
 
 FROM alpine:3.22
 

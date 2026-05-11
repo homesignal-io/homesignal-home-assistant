@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Serve the Web UI at the ingress root to avoid Home Assistant ingress redirects to `/ui`.
+
 ## 0.1.2
 
 - Adjust startup log message for update validation.

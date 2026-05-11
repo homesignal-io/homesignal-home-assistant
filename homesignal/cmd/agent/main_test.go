@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -84,6 +85,24 @@ func TestVersionEndpoint(t *testing.T) {
 	}
 	if response["version"] == "" || response["commit"] == "" || response["build_time"] == "" {
 		t.Fatalf("expected version metadata, got %#v", response)
+	}
+}
+
+func TestRouterServesUIAtIngressRoot(t *testing.T) {
+	state := RuntimeState{
+		Identity: DeviceIdentity{InstallationID: "test-installation"},
+		CoreAPI:  CoreAPIClient{BaseURL: coreAPIBaseURL},
+	}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+
+	newRouter(state).ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", recorder.Code)
+	}
+	if !strings.Contains(recorder.Body.String(), "HomeSignal") {
+		t.Fatalf("expected UI response, got %s", recorder.Body.String())
 	}
 }
 

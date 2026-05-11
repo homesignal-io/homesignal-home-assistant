@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -213,8 +214,13 @@ func newRouter(state RuntimeState) http.Handler {
 	mux.HandleFunc("/readyz", readyHandler(state))
 	mux.HandleFunc("/version", versionHandler)
 	mux.HandleFunc("/ui", uiHandler(state))
+	ui := uiHandler(state)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/ui", http.StatusFound)
+		if r.URL.Path == "/" || strings.HasSuffix(r.URL.Path, "/ui") {
+			ui(w, r)
+			return
+		}
+		http.NotFound(w, r)
 	})
 	return mux
 }

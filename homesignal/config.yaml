@@ -1,6 +1,6 @@
 name: HomeSignal
 slug: homesignal
-version: 0.1.2
+version: 0.1.3
 description: Local HomeSignal agent for Home Assistant fleet management.
 url: https://github.com/homesignal-io/homesignal-home-assistant
 arch:
@@ -15,7 +15,7 @@ map:
   - addon_config:rw
 ingress: true
 ingress_port: 8099
-ingress_entry: /ui
+ingress_entry: /
 panel_title: HomeSignal
 panel_icon: mdi:home-assistant
 timeout: 300

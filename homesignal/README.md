@@ -10,7 +10,7 @@ HomeSignal is a local-build Home Assistant add-on skeleton for the HomeSignal ag
 4. Install the **HomeSignal** add-on.
 5. Start the add-on and open its Web UI.
 
-This skeleton intentionally omits a production `image` field in `config.yaml`, so Home Assistant can build it from the local add-on folder.
+This skeleton intentionally omits a production `image` field in `config.yaml`, so Home Assistant can build it from this add-on folder.
 
 ## Endpoints
 

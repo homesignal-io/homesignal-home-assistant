@@ -1,2 +1,2 @@
-addons/*/.local/
-addons/*/bin/
+*/.local/
+*/bin/

@@ -2,10 +2,10 @@
 
 HomeSignal is the Home Assistant add-on and platform codebase for the HomeSignal project.
 
-The first implemented package is the local-build Home Assistant add-on:
+The first implemented package is the Home Assistant add-on:
 
 ```text
-addons/homesignal
+homesignal
 ```
 
-See `addons/homesignal/README.md` for install and development notes.
+See `homesignal/README.md` for install and development notes.

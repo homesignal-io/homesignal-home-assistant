@@ -11,7 +11,7 @@ This button adds the HomeSignal add-on repository to Home Assistant. Home Assist
 The first implemented package is the Home Assistant add-on:
 
 ```text
-homesignal
+add-on
 ```
 
-See `homesignal/README.md` for install and development notes.
+See `add-on/README.md` for install and development notes.

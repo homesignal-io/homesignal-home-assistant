@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Adjust startup log message for update validation.
+
 ## 0.1.1
 
 - Fix Home Assistant runtime storage writes to `/config/device.json`.

@@ -1,6 +1,6 @@
 name: HomeSignal
 slug: homesignal
-version: 0.1.1
+version: 0.1.2
 description: Local HomeSignal agent for Home Assistant fleet management.
 url: https://github.com/homesignal-io/homesignal-home-assistant
 arch:

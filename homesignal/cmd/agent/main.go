@@ -85,7 +85,7 @@ func main() {
 	}
 
 	go func() {
-		logger.Info("homesignal agent listening", "addr", addr, "installation_id", state.Identity.InstallationID)
+		logger.Info("homesignal agent ready", "addr", addr, "installation_id", state.Identity.InstallationID)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("http server failed", "error", err)
 			os.Exit(1)

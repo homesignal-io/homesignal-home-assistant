@@ -2,7 +2,7 @@ name: HomeSignal
 slug: homesignal
 version: 0.1.0
 description: Local HomeSignal agent for Home Assistant fleet management.
-url: https://github.com/codenada/homesignal
+url: https://github.com/homesignal-io/home-assistant-addon
 arch:
   - amd64
   - aarch64

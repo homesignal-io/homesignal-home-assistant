@@ -1,3 +1,3 @@
-module github.com/codenada/homesignal/homesignal
+module github.com/homesignal-io/home-assistant-addon/homesignal
 
 go 1.25.0

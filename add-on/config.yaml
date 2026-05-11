@@ -18,5 +18,6 @@ ingress_port: 8099
 ingress_entry: /ui
 panel_title: HomeSignal
 panel_icon: mdi:home-assistant
+timeout: 300
 options: {}
 schema: {}

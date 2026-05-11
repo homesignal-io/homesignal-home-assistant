@@ -22,7 +22,8 @@ build:
 
 docker-build:
 	docker build \
-		--build-arg VERSION=$(VERSION) \
+		--build-arg BUILD_VERSION=$(VERSION) \
+		--build-arg BUILD_ARCH=amd64 \
 		--build-arg COMMIT=$(COMMIT) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		-t $(IMAGE) .
@@ -33,7 +34,8 @@ run-agent:
 		CONFIG_DIR=.local/config DATA_DIR=.local/data LISTEN_ADDR=:8099 go run ./cmd/agent; \
 	else \
 		docker build \
-			--build-arg VERSION=$(VERSION) \
+			--build-arg BUILD_VERSION=$(VERSION) \
+			--build-arg BUILD_ARCH=amd64 \
 			--build-arg COMMIT=$(COMMIT) \
 			--build-arg BUILD_TIME=$(BUILD_TIME) \
 			-t $(IMAGE) .; \

@@ -1,12 +1,9 @@
 # syntax=docker/dockerfile:1
 
-ARG BUILDPLATFORM=linux/amd64
+FROM golang:1.25-alpine AS builder
 
-FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
-
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-ARG VERSION=0.1.0
+ARG BUILD_VERSION=0.1.0
+ARG BUILD_ARCH=amd64
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
 
@@ -14,12 +11,20 @@ WORKDIR /src
 COPY go.mod ./
 COPY cmd ./cmd
 
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=${BUILD_ARCH} go build \
     -trimpath \
-    -ldflags="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.buildTime=${BUILD_TIME}" \
+    -ldflags="-s -w -X main.version=${BUILD_VERSION} -X main.commit=${COMMIT} -X main.buildTime=${BUILD_TIME}" \
     -o /out/homesignal-agent ./cmd/agent
 
 FROM alpine:3.22
+
+ARG BUILD_VERSION=0.1.0
+ARG BUILD_ARCH=amd64
+
+LABEL \
+    io.hass.version="${BUILD_VERSION}" \
+    io.hass.type="app" \
+    io.hass.arch="${BUILD_ARCH}"
 
 RUN addgroup -S homesignal \
     && adduser -S -D -H -u 1000 -G homesignal homesignal \
